@@ -1,0 +1,879 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+      initial-scale=1.0,
+      maximum-scale=1.0,
+      user-scalable=no">
+
+<meta name="theme-color" content="#020006">
+
+<title>I miss you ❤️</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #020006;
+}
+
+body {
+    font-family: Georgia, "Times New Roman", serif;
+    touch-action: manipulation;
+}
+
+canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.background {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(120, 0, 70, .30) 0%,
+            rgba(45, 0, 30, .16) 32%,
+            rgba(0, 0, 0, 0) 72%
+        );
+}
+
+/* Startbildschirm */
+
+.start {
+    position: fixed;
+    z-index: 50;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    background: #020006;
+
+    transition:
+        opacity 1.5s ease,
+        visibility 1.5s ease;
+}
+
+.start.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.start-heart {
+    font-size: 52px;
+
+    filter:
+        drop-shadow(0 0 8px #ff4fa8)
+        drop-shadow(0 0 25px #ff006f);
+
+    animation:
+        startPulse 1.8s ease-in-out infinite;
+}
+
+.start-text {
+    margin-top: 25px;
+
+    color: white;
+
+    font-size: 18px;
+    letter-spacing: 2px;
+
+    opacity: .9;
+
+    text-shadow:
+        0 0 10px #ff4fa8,
+        0 0 25px #ff006f;
+
+    animation:
+        textPulse 2s ease-in-out infinite;
+}
+
+@keyframes startPulse {
+
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+@keyframes textPulse {
+
+    0%, 100% {
+        opacity: .55;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* I miss you */
+
+.message {
+    position: fixed;
+    z-index: 20;
+
+    left: 50%;
+    top: 50%;
+
+    width: 100%;
+
+    text-align: center;
+    pointer-events: none;
+
+    opacity: 0;
+
+    transform:
+        translate(-50%, -50%)
+        scale(.6);
+
+    transition:
+        opacity 1.5s ease,
+        transform 1.5s cubic-bezier(.17,.67,.25,1.3);
+}
+
+.message.show {
+    opacity: 1;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1);
+}
+
+.message h1 {
+    color: white;
+
+    font-size: clamp(40px, 10vw, 80px);
+
+    font-weight: normal;
+    font-style: italic;
+
+    letter-spacing: 2px;
+
+    padding: 0 15px;
+
+    text-shadow:
+        0 0 5px white,
+        0 0 12px white,
+        0 0 25px #ffb8dd,
+        0 0 45px #ff2d91,
+        0 0 80px #ff006f;
+
+    animation: textGlow 2s ease-in-out infinite;
+}
+
+@keyframes textGlow {
+
+    0%, 100% {
+        text-shadow:
+            0 0 5px white,
+            0 0 15px #ffb7dd,
+            0 0 30px #ff2d91,
+            0 0 55px #ff006f;
+    }
+
+    50% {
+        text-shadow:
+            0 0 8px white,
+            0 0 25px white,
+            0 0 45px #ff8ec8,
+            0 0 80px #ff006f;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<canvas id="canvas"></canvas>
+
+<!-- Startbildschirm -->
+
+<div class="start" id="start">
+
+    <div class="start-heart">❤️</div>
+
+    <div class="start-text">
+        Touch the screen
+    </div>
+
+</div>
+
+<!-- Nachricht -->
+
+<div class="message" id="message">
+    <h1>I miss you</h1>
+</div>
+
+
+<script>
+
+const canvas =
+    document.getElementById("canvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+const message =
+    document.getElementById("message");
+
+const start =
+    document.getElementById("start");
+
+
+let width;
+let height;
+
+let centerX;
+let centerY;
+
+
+/* Bildschirm */
+
+function resize() {
+
+    const dpr =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    width =
+        window.innerWidth;
+
+    height =
+        window.innerHeight;
+
+    canvas.width =
+        width * dpr;
+
+    canvas.height =
+        height * dpr;
+
+    canvas.style.width =
+        width + "px";
+
+    canvas.style.height =
+        height + "px";
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    centerX =
+        width / 2;
+
+    centerY =
+        height / 2;
+}
+
+resize();
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+
+/* Einstellungen */
+
+const PARTICLE_COUNT = 950;
+
+const FORM_TIME = 5000;
+
+
+/* Herz mathematisch */
+
+function heartPoint(t, scale) {
+
+    const x =
+        16 *
+        Math.pow(
+            Math.sin(t),
+            3
+        );
+
+    const y =
+        13 * Math.cos(t)
+        - 5 * Math.cos(2 * t)
+        - 2 * Math.cos(3 * t)
+        - Math.cos(4 * t);
+
+    return {
+
+        x:
+            centerX +
+            x * scale,
+
+        y:
+            centerY -
+            y * scale
+    };
+}
+
+
+/* Partikel */
+
+class Particle {
+
+    constructor() {
+
+        this.phase =
+            Math.random() *
+            Math.PI * 2;
+
+        this.size =
+            Math.random() *
+            1.7 + .5;
+
+        this.alpha =
+            Math.random() *
+            .7 + .3;
+
+        this.spark =
+            Math.random();
+
+        this.vx = 0;
+        this.vy = 0;
+
+
+        const angle =
+            Math.random() *
+            Math.PI * 2;
+
+        const distance =
+            120 +
+            Math.random() *
+            Math.max(
+                width,
+                height
+            ) * .55;
+
+
+        this.x =
+            centerX +
+            Math.cos(angle) *
+            distance;
+
+        this.y =
+            centerY +
+            Math.sin(angle) *
+            distance;
+
+
+        this.chooseTarget();
+    }
+
+
+    chooseTarget() {
+
+        const t =
+            Math.random() *
+            Math.PI * 2;
+
+
+        /*
+          Herzgröße.
+          Funktioniert automatisch
+          auf kleinen und großen Displays.
+        */
+
+        const scale =
+            Math.min(
+                width,
+                height
+            ) * .017;
+
+
+        const point =
+            heartPoint(
+                t,
+                scale
+            );
+
+
+        /*
+          Das Herz wird etwas dicker,
+          bleibt aber elegant.
+        */
+
+        const thickness = 16;
+
+
+        this.targetX =
+            point.x +
+            (Math.random() - .5) *
+            thickness;
+
+        this.targetY =
+            point.y +
+            (Math.random() - .5) *
+            thickness;
+    }
+
+
+    /* Herz entsteht */
+
+    updateForming(time) {
+
+        const dx =
+            this.targetX -
+            this.x;
+
+        const dy =
+            this.targetY -
+            this.y;
+
+
+        this.vx +=
+            dx * .0018;
+
+        this.vy +=
+            dy * .0018;
+
+
+        this.vx *= .91;
+        this.vy *= .91;
+
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+
+        this.x +=
+            Math.sin(
+                time * .003 +
+                this.phase
+            ) * .06;
+
+        this.y +=
+            Math.cos(
+                time * .003 +
+                this.phase
+            ) * .06;
+    }
+
+
+    /* Herz bleibt */
+
+    updateHeart(time) {
+
+        const dx =
+            this.targetX -
+            this.x;
+
+        const dy =
+            this.targetY -
+            this.y;
+
+
+        this.vx +=
+            dx * .0005;
+
+        this.vy +=
+            dy * .0005;
+
+
+        this.vx *= .90;
+        this.vy *= .90;
+
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+
+        this.x +=
+            Math.sin(
+                time * .002 +
+                this.phase
+            ) * .10;
+
+        this.y +=
+            Math.cos(
+                time * .002 +
+                this.phase
+            ) * .10;
+    }
+
+
+    /* Partikel zeichnen */
+
+    draw(time) {
+
+        const pulse =
+            .7 +
+            Math.sin(
+                time * .004 +
+                this.phase
+            ) * .3;
+
+
+        const alpha =
+            this.alpha * pulse;
+
+
+        const isStar =
+            this.spark > .94;
+
+
+        const size =
+            this.size *
+            (isStar ? 2.2 : 1);
+
+
+        ctx.save();
+
+        ctx.globalAlpha =
+            alpha;
+
+
+        ctx.shadowBlur =
+            isStar ? 20 : 9;
+
+        ctx.shadowColor =
+            "#ff3c9d";
+
+
+        if (this.spark > .96) {
+
+            ctx.fillStyle =
+                "#ffffff";
+
+        }
+        else if (this.spark > .70) {
+
+            ctx.fillStyle =
+                "#ffc0e0";
+
+        }
+        else {
+
+            ctx.fillStyle =
+                "#ff4fa8";
+        }
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            this.x,
+            this.y,
+            size,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+
+        /* Funkelnde Sterne */
+
+        if (isStar) {
+
+            ctx.globalAlpha =
+                alpha * .75;
+
+            ctx.strokeStyle =
+                "#ffffff";
+
+            ctx.lineWidth =
+                .7;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                this.x - 7,
+                this.y
+            );
+
+            ctx.lineTo(
+                this.x + 7,
+                this.y
+            );
+
+
+            ctx.moveTo(
+                this.x,
+                this.y - 7
+            );
+
+            ctx.lineTo(
+                this.x,
+                this.y + 7
+            );
+
+            ctx.stroke();
+        }
+
+
+        ctx.restore();
+    }
+}
+
+
+/* Partikel erstellen */
+
+const particles = [];
+
+for (
+    let i = 0;
+    i < PARTICLE_COUNT;
+    i++
+) {
+
+    particles.push(
+        new Particle()
+    );
+}
+
+
+let startTime = null;
+
+let heartFinished = false;
+
+let started = false;
+
+
+/* Animation */
+
+function animate(time) {
+
+    if (!startTime) {
+        startTime = time;
+    }
+
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const elapsed =
+        time - startTime;
+
+
+    /* Herz entsteht */
+
+    if (elapsed < FORM_TIME) {
+
+        particles.forEach(
+            p =>
+                p.updateForming(time)
+        );
+
+
+        const progress =
+            Math.min(
+                elapsed /
+                FORM_TIME,
+                1
+            );
+
+
+        const glow =
+            ctx.createRadialGradient(
+                centerX,
+                centerY,
+                0,
+                centerX,
+                centerY,
+                Math.min(
+                    width,
+                    height
+                ) * .45
+            );
+
+
+        glow.addColorStop(
+            0,
+            `rgba(
+                255,
+                20,
+                140,
+                ${.02 + progress * .08}
+            )`
+        );
+
+
+        glow.addColorStop(
+            1,
+            "rgba(255,20,140,0)"
+        );
+
+
+        ctx.fillStyle =
+            glow;
+
+        ctx.fillRect(
+            0,
+            0,
+            width,
+            height
+        );
+    }
+
+
+    /* Herz fertig */
+
+    else {
+
+        if (!heartFinished) {
+
+            heartFinished = true;
+
+
+            setTimeout(
+                () => {
+
+                    message.classList.add(
+                        "show"
+                    );
+
+                },
+                300
+            );
+        }
+
+
+        particles.forEach(
+            p =>
+                p.updateHeart(time)
+        );
+
+
+        const glow =
+            ctx.createRadialGradient(
+                centerX,
+                centerY,
+                0,
+                centerX,
+                centerY,
+                Math.min(
+                    width,
+                    height
+                ) * .42
+            );
+
+
+        glow.addColorStop(
+            0,
+            "rgba(255,20,140,.10)"
+        );
+
+        glow.addColorStop(
+            .45,
+            "rgba(255,20,140,.025)"
+        );
+
+        glow.addColorStop(
+            1,
+            "rgba(255,20,140,0)"
+        );
+
+
+        ctx.fillStyle =
+            glow;
+
+        ctx.fillRect(
+            0,
+            0,
+            width,
+            height
+        );
+    }
+
+
+    particles.forEach(
+        p =>
+            p.draw(time)
+    );
+
+
+    requestAnimationFrame(
+        animate
+    );
+}
+
+
+/* Start bei Berührung */
+
+function begin() {
+
+    if (started) {
+        return;
+    }
+
+    started = true;
+
+
+    start.classList.add(
+        "hidden"
+    );
+
+
+    startTime =
+        performance.now();
+
+
+    requestAnimationFrame(
+        animate
+    );
+}
+
+
+/* Touch */
+
+window.addEventListener(
+    "touchstart",
+    begin,
+    { passive: true }
+);
+
+
+/* Mausklick */
+
+window.addEventListener(
+    "click",
+    begin
+);
+
+</script>
+
+</body>
+</html>
+```

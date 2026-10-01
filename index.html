@@ -1,6 +1,8 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 
 <meta name="viewport"
@@ -34,28 +36,16 @@ body {
     touch-action: manipulation;
 }
 
-
-/* --------------------------------
-   Canvas
--------------------------------- */
-
 canvas {
     position: fixed;
     inset: 0;
-
     width: 100%;
     height: 100%;
 }
 
-
-/* --------------------------------
-   Hintergrund
--------------------------------- */
-
 .background {
     position: fixed;
     inset: 0;
-
     pointer-events: none;
 
     background:
@@ -68,23 +58,16 @@ canvas {
 }
 
 
-/* --------------------------------
-   Startbildschirm
--------------------------------- */
+/* START SCREEN */
 
 .start {
     position: fixed;
-
     z-index: 50;
-
     inset: 0;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
-
-    flex-direction: column;
 
     background: #020006;
 
@@ -93,28 +76,20 @@ canvas {
         visibility 1.5s ease;
 }
 
-
-/* verschwindet nach dem Tippen */
-
 .start.hidden {
-
     opacity: 0;
-
     visibility: hidden;
-
     pointer-events: none;
 }
 
-
-/* --------------------------------
-   Touch the screen
--------------------------------- */
-
 .start-text {
-
     color: white;
 
-    font-size: 18px;
+    font-size: clamp(
+        16px,
+        4.5vw,
+        22px
+    );
 
     letter-spacing: 2px;
 
@@ -128,7 +103,6 @@ canvas {
         textPulse 2s ease-in-out infinite;
 }
 
-
 @keyframes textPulse {
 
     0%, 100% {
@@ -141,14 +115,10 @@ canvas {
 }
 
 
-/* --------------------------------
-   I miss you
--------------------------------- */
+/* I MISS YOU */
 
 .message {
-
     position: fixed;
-
     z-index: 20;
 
     left: 50%;
@@ -171,9 +141,7 @@ canvas {
         transform 1.5s cubic-bezier(.17,.67,.25,1.3);
 }
 
-
 .message.show {
-
     opacity: 1;
 
     transform:
@@ -181,25 +149,39 @@ canvas {
         scale(1);
 }
 
-
 .message h1 {
 
     color: white;
 
-    font-size:
-        clamp(
-            40px,
-            10vw,
-            80px
-        );
+    /*
+       Die Schrift passt sich automatisch
+       an die Bildschirmbreite an.
+    */
+
+    font-size: clamp(
+        28px,
+        7.5vw,
+        68px
+    );
 
     font-weight: normal;
 
     font-style: italic;
 
-    letter-spacing: 2px;
+    letter-spacing: 1px;
 
-    padding: 0 15px;
+    /*
+       Der Text bleibt innerhalb
+       des Herzens.
+    */
+
+    width: 85vw;
+
+    max-width: 650px;
+
+    margin: 0 auto;
+
+    padding: 0 8px;
 
     text-shadow:
 
@@ -216,7 +198,6 @@ canvas {
     animation:
         textGlow 2s ease-in-out infinite;
 }
-
 
 @keyframes textGlow {
 
@@ -248,42 +229,27 @@ canvas {
 }
 
 </style>
-</head>
 
+</head>
 
 <body>
 
 
-<!-- Hintergrund -->
-
 <div class="background"></div>
-
-
-<!-- Partikel -->
 
 <canvas id="canvas"></canvas>
 
 
-<!-- Startbildschirm -->
-
-<div
-    class="start"
-    id="start">
+<div class="start" id="start">
 
     <div class="start-text">
-
         Touch the screen
-
     </div>
 
 </div>
 
 
-<!-- Nachricht -->
-
-<div
-    class="message"
-    id="message">
+<div class="message" id="message">
 
     <h1>
         I miss you
@@ -292,13 +258,8 @@ canvas {
 </div>
 
 
-
 <script>
 
-
-/* --------------------------------
-   Elemente
--------------------------------- */
 
 const canvas =
     document.getElementById("canvas");
@@ -313,16 +274,16 @@ const start =
     document.getElementById("start");
 
 
-/* --------------------------------
-   Bildschirm
--------------------------------- */
-
 let width;
 let height;
 
 let centerX;
 let centerY;
 
+
+/* =========================
+   SCREEN SIZE
+========================= */
 
 function resize() {
 
@@ -332,13 +293,11 @@ function resize() {
             2
         );
 
-
     width =
         window.innerWidth;
 
     height =
         window.innerHeight;
-
 
     canvas.width =
         width * dpr;
@@ -346,13 +305,11 @@ function resize() {
     canvas.height =
         height * dpr;
 
-
     canvas.style.width =
         width + "px";
 
     canvas.style.height =
         height + "px";
-
 
     ctx.setTransform(
         dpr,
@@ -362,7 +319,6 @@ function resize() {
         0,
         0
     );
-
 
     centerX =
         width / 2;
@@ -381,26 +337,20 @@ window.addEventListener(
 );
 
 
+/* =========================
+   PARTICLES
+========================= */
 
-/* --------------------------------
-   Einstellungen
--------------------------------- */
+const PARTICLE_COUNT =
+    1000;
 
-const PARTICLE_COUNT = 950;
-
-
-/*
-   Wie lange das Herz entsteht.
-   5000 = 5 Sekunden
-*/
-
-const FORM_TIME = 5000;
+const FORM_TIME =
+    5000;
 
 
-
-/* --------------------------------
-   Herzform
--------------------------------- */
+/* =========================
+   HEART
+========================= */
 
 function heartPoint(
     t,
@@ -413,7 +363,6 @@ function heartPoint(
             Math.sin(t),
             3
         );
-
 
     const y =
         13 *
@@ -437,19 +386,18 @@ function heartPoint(
         y:
             centerY -
             y * scale
+
     };
 }
 
 
-
-/* --------------------------------
-   Partikel
--------------------------------- */
+/* =========================
+   PARTICLE
+========================= */
 
 class Particle {
 
     constructor() {
-
 
         this.phase =
             Math.random() *
@@ -474,14 +422,9 @@ class Particle {
 
 
         this.vx = 0;
+
         this.vy = 0;
 
-
-
-        /*
-           Zufälliger Startpunkt
-           außerhalb des Herzens
-        */
 
         const angle =
             Math.random() *
@@ -493,7 +436,6 @@ class Particle {
             120 +
 
             Math.random() *
-
             Math.max(
                 width,
                 height
@@ -513,8 +455,8 @@ class Particle {
             distance;
 
 
-
         this.targetX = 0;
+
         this.targetY = 0;
 
 
@@ -522,13 +464,7 @@ class Particle {
     }
 
 
-
-    /* --------------------------------
-       Zielpunkt
-    -------------------------------- */
-
     chooseTarget() {
-
 
         const t =
             Math.random() *
@@ -537,8 +473,14 @@ class Particle {
 
 
         /*
-           Herzgröße
-           passt sich dem Handy an
+           Das Herz wird automatisch
+           an den Bildschirm angepasst.
+
+           Kleine Handys:
+           kleineres Herz
+
+           Große Bildschirme:
+           größeres Herz
         */
 
         const scale =
@@ -546,7 +488,7 @@ class Particle {
                 width,
                 height
             ) *
-            .017;
+            0.019;
 
 
         const point =
@@ -557,11 +499,16 @@ class Particle {
 
 
         /*
-           Herz etwas dicker
-           aber nicht zu dick
+           Herz leicht dicker,
+           aber nicht übertrieben.
         */
 
-        const thickness = 16;
+        const thickness =
+            Math.min(
+                width,
+                height
+            ) *
+            0.012;
 
 
         this.targetX =
@@ -571,7 +518,6 @@ class Particle {
                 Math.random() -
                 .5
             ) *
-
             thickness;
 
 
@@ -582,18 +528,11 @@ class Particle {
                 Math.random() -
                 .5
             ) *
-
             thickness;
     }
 
 
-
-    /* --------------------------------
-       Herz entsteht
-    -------------------------------- */
-
     updateForming(time) {
-
 
         const dx =
             this.targetX -
@@ -605,7 +544,6 @@ class Particle {
             this.y;
 
 
-
         this.vx +=
             dx *
             .0018;
@@ -614,7 +552,6 @@ class Particle {
         this.vy +=
             dy *
             .0018;
-
 
 
         this.vx *= .91;
@@ -622,7 +559,6 @@ class Particle {
         this.vy *= .91;
 
 
-
         this.x +=
             this.vx;
 
@@ -631,41 +567,26 @@ class Particle {
             this.vy;
 
 
-
-        /*
-           leichtes Schweben
-        */
-
         this.x +=
-
             Math.sin(
                 time *
                 .003 +
                 this.phase
             ) *
-
             .06;
 
 
         this.y +=
-
             Math.cos(
                 time *
                 .003 +
                 this.phase
             ) *
-
             .06;
     }
 
 
-
-    /* --------------------------------
-       Herz bleibt
-    -------------------------------- */
-
     updateHeart(time) {
-
 
         const dx =
             this.targetX -
@@ -675,7 +596,6 @@ class Particle {
         const dy =
             this.targetY -
             this.y;
-
 
 
         this.vx +=
@@ -688,11 +608,9 @@ class Particle {
             .0005;
 
 
-
         this.vx *= .90;
 
         this.vy *= .90;
-
 
 
         this.x +=
@@ -703,44 +621,28 @@ class Particle {
             this.vy;
 
 
-
-        /*
-           ganz leichte Bewegung
-        */
-
         this.x +=
-
             Math.sin(
                 time *
                 .002 +
                 this.phase
             ) *
-
             .10;
 
 
         this.y +=
-
             Math.cos(
                 time *
                 .002 +
                 this.phase
             ) *
-
             .10;
     }
 
 
-
-    /* --------------------------------
-       Zeichnen
-    -------------------------------- */
-
     draw(time) {
 
-
         const pulse =
-
             .7 +
 
             Math.sin(
@@ -748,7 +650,6 @@ class Particle {
                 .004 +
                 this.phase
             ) *
-
             .3;
 
 
@@ -771,13 +672,11 @@ class Particle {
             );
 
 
-
         ctx.save();
 
 
         ctx.globalAlpha =
             alpha;
-
 
 
         ctx.shadowBlur =
@@ -789,11 +688,6 @@ class Particle {
         ctx.shadowColor =
             "#ff3c9d";
 
-
-
-        /*
-           Farben
-        */
 
         if (
             this.spark >
@@ -822,11 +716,6 @@ class Particle {
         }
 
 
-
-        /*
-           Punkt
-        */
-
         ctx.beginPath();
 
 
@@ -841,19 +730,18 @@ class Particle {
             0,
 
             Math.PI * 2
+
         );
 
 
         ctx.fill();
 
 
-
         /*
-           Funkelnde Sterne
+           Kleine leuchtende Sterne
         */
 
         if (isStar) {
-
 
             ctx.globalAlpha =
                 alpha *
@@ -868,40 +756,29 @@ class Particle {
                 .7;
 
 
-
             ctx.beginPath();
 
 
-
             ctx.moveTo(
-
                 this.x - 7,
-
                 this.y
             );
 
 
             ctx.lineTo(
-
                 this.x + 7,
-
                 this.y
             );
 
 
-
             ctx.moveTo(
-
                 this.x,
-
                 this.y - 7
             );
 
 
             ctx.lineTo(
-
                 this.x,
-
                 this.y + 7
             );
 
@@ -910,16 +787,14 @@ class Particle {
         }
 
 
-
         ctx.restore();
     }
 }
 
 
-
-/* --------------------------------
-   Partikel erstellen
--------------------------------- */
+/* =========================
+   CREATE PARTICLES
+========================= */
 
 const particles = [];
 
@@ -939,25 +814,24 @@ for (
 }
 
 
+/* =========================
+   ANIMATION
+========================= */
 
-/* --------------------------------
-   Animation
--------------------------------- */
+let startTime =
+    null;
 
-let startTime = null;
 
-let heartFinished = false;
+let heartFinished =
+    false;
 
-let started = false;
 
+let started =
+    false;
 
 
 function animate(time) {
 
-
-    /*
-       Startzeit setzen
-    */
 
     if (!startTime) {
 
@@ -966,22 +840,12 @@ function animate(time) {
     }
 
 
-
-    /*
-       Bildschirm löschen
-    */
-
     ctx.clearRect(
-
         0,
-
         0,
-
         width,
-
         height
     );
-
 
 
     const elapsed =
@@ -989,10 +853,9 @@ function animate(time) {
         startTime;
 
 
-
-    /* --------------------------------
-       HERZ ENTSTEHT
-    -------------------------------- */
+    /* =====================
+       HEART FORMS
+    ===================== */
 
     if (
         elapsed <
@@ -1001,7 +864,6 @@ function animate(time) {
 
 
         particles.forEach(
-
             p =>
                 p.updateForming(
                     time
@@ -1009,25 +871,15 @@ function animate(time) {
         );
 
 
-
         const progress =
-
             Math.min(
-
                 elapsed /
                 FORM_TIME,
-
                 1
             );
 
 
-
-        /*
-           rosa Hintergrund-Glow
-        */
-
         const glow =
-
             ctx.createRadialGradient(
 
                 centerX,
@@ -1045,8 +897,8 @@ function animate(time) {
                     height
                 ) *
                 .45
-            );
 
+            );
 
 
         glow.addColorStop(
@@ -1061,6 +913,7 @@ function animate(time) {
                 progress *
                 .08}
             )`
+
         );
 
 
@@ -1069,8 +922,8 @@ function animate(time) {
             1,
 
             "rgba(255,20,140,0)"
-        );
 
+        );
 
 
         ctx.fillStyle =
@@ -1086,21 +939,18 @@ function animate(time) {
             width,
 
             height
+
         );
+
     }
 
 
-
-    /* --------------------------------
-       HERZ FERTIG
-    -------------------------------- */
+    /* =====================
+       HEART FINISHED
+    ===================== */
 
     else {
 
-
-        /*
-           Nur einmal ausführen
-        */
 
         if (
             !heartFinished
@@ -1110,13 +960,6 @@ function animate(time) {
             heartFinished =
                 true;
 
-
-
-            /*
-               I miss you
-               erscheint kurz
-               nachdem das Herz fertig ist
-            */
 
             setTimeout(
 
@@ -1129,14 +972,10 @@ function animate(time) {
                 },
 
                 300
+
             );
         }
 
-
-
-        /*
-           Herz bleibt bestehen
-        */
 
         particles.forEach(
 
@@ -1144,16 +983,11 @@ function animate(time) {
                 p.updateHeart(
                     time
                 )
+
         );
 
 
-
-        /*
-           Herz-Glow
-        */
-
         const glow =
-
             ctx.createRadialGradient(
 
                 centerX,
@@ -1171,8 +1005,8 @@ function animate(time) {
                     height
                 ) *
                 .42
-            );
 
+            );
 
 
         glow.addColorStop(
@@ -1180,6 +1014,7 @@ function animate(time) {
             0,
 
             "rgba(255,20,140,.10)"
+
         );
 
 
@@ -1188,6 +1023,7 @@ function animate(time) {
             .45,
 
             "rgba(255,20,140,.025)"
+
         );
 
 
@@ -1196,8 +1032,8 @@ function animate(time) {
             1,
 
             "rgba(255,20,140,0)"
-        );
 
+        );
 
 
         ctx.fillStyle =
@@ -1213,14 +1049,14 @@ function animate(time) {
             width,
 
             height
+
         );
     }
 
 
-
-    /*
-       Partikel zeichnen
-    */
+    /* =====================
+       DRAW PARTICLES
+    ===================== */
 
     particles.forEach(
 
@@ -1228,13 +1064,9 @@ function animate(time) {
             p.draw(
                 time
             )
+
     );
 
-
-
-    /*
-       Nächster Frame
-    */
 
     requestAnimationFrame(
         animate
@@ -1242,17 +1074,12 @@ function animate(time) {
 }
 
 
-
-/* --------------------------------
-   Startfunktion
--------------------------------- */
+/* =========================
+   START
+========================= */
 
 function begin() {
 
-
-    /*
-       Nur einmal starten
-    */
 
     if (started) {
 
@@ -1264,25 +1091,13 @@ function begin() {
         true;
 
 
-
-    /*
-       "Touch the screen"
-       verschwindet
-    */
-
     start.classList.add(
         "hidden"
     );
 
 
-
-    /*
-       Animation starten
-    */
-
     startTime =
         performance.now();
-
 
 
     requestAnimationFrame(
@@ -1291,10 +1106,9 @@ function begin() {
 }
 
 
-
-/* --------------------------------
-   iPhone Touch
--------------------------------- */
+/* =========================
+   TOUCH / CLICK
+========================= */
 
 window.addEventListener(
 
@@ -1305,18 +1119,12 @@ window.addEventListener(
     {
         passive: true
     }
+
 );
 
 
-
-/* --------------------------------
-   Computer / Maus
--------------------------------- */
-
 window.addEventListener(
-
     "click",
-
     begin
 );
 
@@ -1325,3 +1133,4 @@ window.addEventListener(
 
 </body>
 </html>
+```
